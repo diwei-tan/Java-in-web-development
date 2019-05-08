@@ -1,3 +1,4 @@
+import java.time.LocalDateTime;
 
 public class ClubApplication {
 	public void message() {
@@ -43,12 +44,21 @@ public class ClubApplication {
 		clubYY.addMember("Guan", "Yang Yue", "Phoenix Rising");
 		clubYY.addMember("Guan", "Yang Yue", "Phoenix Rising");
 		clubYY.showMembers();
-		Facility f1 = new Facility("MPH", "Multi-purpose Hall");
-		Facility f2 = new Facility("Computer Room");
-		Facility f3 = new Facility ("Mac Commons", "Room with lots of macs");
-		f1.show();
-		f2.show();
-		f3.show();
+		
+		clubYY.addFacility("MPH", "Multi-purpose Hall");
+		clubYY.addFacility("Computer Room", null);
+		clubYY.addFacility("Mac Commons", "Study-room with lots of Macs");
+		clubYY.showFacilities();
+		clubYY.show();
+		
+		//Booking testing
+		try {
+			Booking booking = new Booking(clubYY.getClubMembers().get(0), clubYY.getFacility("MPH"), LocalDateTime.now(), LocalDateTime.now().plusDays(5));
+			System.out.println(booking.toString());
+		} catch (BadBookingException e) {
+			System.out.println("ERROR: "+e.getMessage());
+		}
+		
 	}
 
 }

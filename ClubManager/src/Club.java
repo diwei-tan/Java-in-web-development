@@ -1,50 +1,98 @@
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Club {
-	private static int memberCount =0;
+	private HashMap<String, Facility> facilities = new HashMap<String, Facility>();
 	private static int membershipNum =1;
-	private Member[] clubMembers = new Member[100];
+	private ArrayList<Member> clubMembers = new ArrayList<Member>();
+	private BookingRegister bookingRegister = new BookingRegister();
+	
+	//Managing modules for members
 	public void addMember(String surname, String firstname, String secondName) {
 		Member m = new Member(membershipNum, surname, firstname, secondName);
-		clubMembers[memberCount++]=m;
+		clubMembers.add(m);
 		membershipNum++;
-		
 	}
-	public Member[] getClubMembers() {
+	public ArrayList<Member> getClubMembers() {
 		return clubMembers;
 	}
-	public static int getMemberCount() {
-		return memberCount;
-	}
 	public void showMembers() {
-		for(int i=0; i<memberCount; i++) {
-			clubMembers[i].show();
+		for(Member member : clubMembers) {
+			member.show();
 		}
 	}
-	//take into consideration number inputed can be any positive
-	//If greater than member count, not within range of array
 	public void removeMember(int num) throws Exception{
-		boolean notFound=true;
-		int start;
-		if (num>memberCount) {
-			start=memberCount;
+		boolean removed = clubMembers.removeIf(member -> (member.getMemberNo() == num));
+		if(!removed) {
+			throw new Exception("Member no." + num + " could not be found");
 		}
-		else {
-			start = num-1;
-		}
-		//More efficient to search from top/number given
-		for(int i=start; i>=0; i--) {
-			if(clubMembers[i].getMemberNo()==num) {
-				for(int j=i+1; j<memberCount; j++) {
-					clubMembers[j-1]=clubMembers[j];
-				}
-				System.out.println("Removed memeber no. " + num);
-				memberCount--;
-				notFound=false;
+	}
+	public Member getMemberByMemberNum(int num) {
+		Member member=null;
+		for (Member m : clubMembers) {
+			if(m.getMemberNo()==num) {
+				member = m;
 				break;
 			}
 		}
-		if(notFound) {
-			throw new Exception("Memebership number " + num + " was not found.");
+		return member;
+	}
+	
+	//Facilities management
+	public Facility getFacility(String name) {
+		return facilities.get(name);
+	}
+	public HashMap<String, Facility> getFacilities(){
+		return facilities;
+	}
+	public void addFacility(String name, String description) {
+		Facility f = new Facility(name, description);
+		facilities.put(f.getName(), f);
+		System.out.println(f.getName() + " Has been added to facilities.");
+	}
+	public void removeFacility(String name) {
+		facilities.remove(name);
+	}
+	public void showFacilities() {
+		for(Facility f : facilities.values()) {
+			f.show();
+		}
+	}
+	
+	//show method to show all members and facilities
+	public void show() {
+		System.out.println("CLUB INFO:");
+		System.out.println();
+		System.out.println("MEMBERS");
+		System.out.println("-------");
+		for(Member m : clubMembers) {
+			m.show();
+		}
+		System.out.println();
+		System.out.println("FACILITIES");
+		System.out.println("----------");
+		for(Facility f : facilities.values()) {
+			f.show();
+		}
+	}
+	
+	//methods for booking register management
+	public void addBooking(int memberNum, String facilityName, LocalDateTime start, LocalDateTime end) throws BadBookingException{
+		Member member = this.getMemberByMemberNum(memberNum);
+		Facility facility = this.getFacility(facilityName);
+		bookingRegister.addBooking(member, facility, start, end);
+	}
+	public ArrayList<Booking> getBookings(String facilityName, LocalDateTime rangeStart, LocalDateTime rangeEnd){
+		ArrayList<Booking> bookingsWithinRange = bookingRegister.getBookings(this.getFacility(facilityName), rangeStart, rangeEnd);
+		return bookingsWithinRange;
+	}
+	public void showBookings(String facilityName, LocalDateTime rangeStart, LocalDateTime rangeEnd) {
+		ArrayList<Booking> bookingsWithinRange = this.getBookings(facilityName, rangeStart, rangeEnd);
+		System.out.println("BOOKINGS WITHIN RANGE");
+		System.out.println("---------------------");
+		for(Booking b : bookingsWithinRange) {
+			b.show();
 		}
 	}
 }
